@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --sidebar-width: 240px;
+    --header-height: 60px;
+    --color-sidebar: #f5f6fa;
+    --color-sidebar-hover: rgba(0, 0, 0, 0.04);
+    --color-sidebar-active: #d4e9c6;
+    --color-primary: #002d1e;
+    --color-primary-dark: #001f14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+  }
+
+  body {
+    @apply bg-[#fafafa] text-gray-900 antialiased;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-200 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-gray-300; }
+
+  input, textarea, select, button { font-family: inherit; }
+}
+
+@layer utilities {
+  /* Sidebar styling */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--color-sidebar);
+    border-right: 1px solid #e0e0e0;
+    min-height: 100vh;
+    flex-shrink: 0;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+  .card-hover {
+    @apply transition-all duration-200;
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+  }
+
+  /* Government price box container */
+  .gov-price-box {
+    @apply bg-[#f1f7ec] rounded-xl p-3 border border-[#d4e9c6]/30;
+  }
+
+  /* Inputs */
+  .input-base {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white
+           focus:outline-none focus:ring-2 focus:ring-[#002d1e] focus:border-transparent
+           placeholder-gray-400 transition-all;
+  }
+
+  /* Custom gradient green */
+  .gradient-green {
+    background: linear-gradient(135deg, #002d1e, #004d33);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-[#002d1e] hover:bg-[#004d33] active:scale-95 text-white font-semibold
+           rounded-xl px-5 py-2.5 text-sm transition-all flex items-center gap-2
+           justify-center disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply border border-gray-200 hover:border-gray-300 text-gray-700 font-semibold
+           rounded-xl px-5 py-2.5 text-sm transition-all flex items-center gap-2 justify-center;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  /* Safe bottom for mobile */
+  .safe-pb { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+           text-gray-600 hover:text-[#002d1e] hover:bg-black/5 transition-all cursor-pointer;
+  }
+  .nav-item.active {
+    @apply text-[#002d1e] font-semibold;
+    background: var(--color-sidebar-active);
+  }
+
+  /* Page headers */
+  .page-title { @apply text-2xl font-bold text-[#002d1e] leading-tight; }
+  .page-subtitle { @apply text-sm text-gray-500 mt-0.5; }
+
+  /* Hide scrollbars */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
