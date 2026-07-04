@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuthStore } from '../../store';
-import { User, Mail, Phone, MapPin, LogOut, Star } from 'lucide-react';
+import { User, Mail, Phone, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LocationPicker from '../../components/LocationPicker';
 
 export default function BuyerProfile() {
   const { user, logout } = useAuthStore();
@@ -54,6 +55,9 @@ export default function BuyerProfile() {
           </div>
         </div>
       </div>
+
+      {/* Location */}
+      <LocationPicker />
 
       <button
         onClick={handleLogout}

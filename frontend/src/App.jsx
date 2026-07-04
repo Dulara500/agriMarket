@@ -30,6 +30,10 @@ import FarmerEarnings from './pages/farmer/Earnings';
 import AdminPrices from './pages/admin/Prices';
 import AdminUsers from './pages/admin/Users';
 import AdminAnalytics from './pages/admin/Analytics';
+import AdminFertilizers from './pages/admin/Fertilizers';
+
+// Farmer Extra
+import FarmerFertilizers from './pages/farmer/Fertilizers';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuthStore();
@@ -81,6 +85,7 @@ function App() {
           <Route path="products" element={<FarmerProducts />} />
           <Route path="orders" element={<FarmerOrders />} />
           <Route path="earnings" element={<FarmerEarnings />} />
+          <Route path="fertilizers" element={<FarmerFertilizers />} />
         </Route>
 
         {/* Admin */}
@@ -88,6 +93,7 @@ function App() {
           <Route path="prices" element={<AdminPrices />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="fertilizers" element={<AdminFertilizers />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/redirect" replace />} />

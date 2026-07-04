@@ -128,6 +128,27 @@ const getFarmerStats = async (req, res, next) => {
   }
 };
 
+// GET /api/farmer/low-stock
+const getLowStockProducts = async (req, res, next) => {
+  try {
+    const threshold = parseInt(req.query.threshold) || 10;
+    const result = await pool.query(
+      `SELECT fp.id, fp.stock_quantity, fp.is_available, p.name, p.image_url, p.unit,
+              gp.price_per_unit as government_price
+       FROM farmer_products fp
+       JOIN products p ON p.id = fp.product_id
+       LEFT JOIN government_prices gp ON gp.product_id = p.id AND gp.is_active = true
+       WHERE fp.farmer_id = $1 AND fp.stock_quantity <= $2
+       ORDER BY fp.stock_quantity ASC
+       LIMIT 10`,
+      [req.user.id, threshold]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/farmer/earnings
 const getEarnings = async (req, res, next) => {
   try {
@@ -196,6 +217,7 @@ module.exports = {
   removeProduct,
   getFarmerStats,
   getEarnings,
+  getLowStockProducts,
   createProductRequest,
   getMyProductRequests
 };

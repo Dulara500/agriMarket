@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
-import { Search, ChevronRight, Leaf, TrendingUp, Star, Heart } from 'lucide-react';
+import { Search, ChevronRight, Leaf, TrendingUp, Star, Heart, MapPin, X } from 'lucide-react';
 import { useAuthStore } from '../../store';
 
 const CATEGORY_COLORS = {
@@ -16,22 +16,32 @@ export default function BuyerHome() {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('');
   const [loading, setLoading] = useState(true);
+  const [locationBannerDismissed, setLocationBannerDismissed] = useState(false);
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search') || '';
 
+  const buyerLat = user?.location_lat ? parseFloat(user.location_lat) : null;
+  const buyerLng = user?.location_lng ? parseFloat(user.location_lng) : null;
+  const hasLocation = buyerLat !== null && buyerLng !== null;
+
   useEffect(() => {
     setLoading(true);
+    const params = { search, category: activeCategory };
+    if (hasLocation) {
+      params.lat = buyerLat;
+      params.lng = buyerLng;
+    }
     Promise.all([
-      api.get('/products', { params: { search, category: activeCategory } }),
+      api.get('/products', { params }),
       api.get('/products/categories'),
     ]).then(([pRes, cRes]) => {
       setProducts(pRes.data.data);
       setCategories(cRes.data.data);
     }).finally(() => setLoading(false));
-  }, [search, activeCategory]);
+  }, [search, activeCategory, buyerLat, buyerLng]);
 
   const handleMobileSearch = (e) => {
     const val = e.target.value;
@@ -56,8 +66,41 @@ export default function BuyerHome() {
             <Star className="w-3.5 h-3.5" />
             <span className="text-xs font-semibold">Verified Farmers</span>
           </div>
+          {hasLocation && (
+            <div className="flex items-center gap-1.5 bg-white/10 rounded-full px-3.5 py-1">
+              <MapPin className="w-3.5 h-3.5" />
+              <span className="text-xs font-semibold">Within 20 km</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* No-location soft banner */}
+      {!hasLocation && !locationBannerDismissed && (
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 bg-amber-50 border border-amber-200 rounded-2xl">
+          <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <MapPin className="w-4 h-4 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800">Set your location</p>
+            <p className="text-xs text-amber-600 mt-0.5">See only farmers within 20 km of you</p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => navigate('/profile')}
+              className="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-full transition-colors"
+            >
+              Set now
+            </button>
+            <button
+              onClick={() => setLocationBannerDismissed(true)}
+              className="p-1 rounded-full text-amber-400 hover:text-amber-600 hover:bg-amber-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile-only Search */}
       <div className="relative mb-5 md:hidden">
@@ -103,6 +146,11 @@ export default function BuyerHome() {
         <h3 className="text-lg font-bold text-gray-900">
           {activeCategory || 'Available Produce'} <span className="text-gray-400 font-normal text-sm">({products.length})</span>
         </h3>
+        {hasLocation && (
+          <span className="flex items-center gap-1 text-xs text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+            <MapPin className="w-3 h-3" /> Nearby farmers
+          </span>
+        )}
       </div>
 
       {loading ? (
@@ -122,7 +170,19 @@ export default function BuyerHome() {
         <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
           <Leaf className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-semibold text-gray-700">No products found</p>
-          <p className="text-sm text-gray-400 mt-1">Try resetting the filters or check again later.</p>
+          <p className="text-sm text-gray-400 mt-1">
+            {hasLocation
+              ? 'No farmers within 20 km have stock. Try again later.'
+              : 'Try resetting the filters or check again later.'}
+          </p>
+          {hasLocation && (
+            <button
+              onClick={() => navigate('/profile')}
+              className="mt-4 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-full transition-colors"
+            >
+              Change location
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -174,8 +234,8 @@ export default function BuyerHome() {
                   <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
                     <span className="font-medium">
                       {product.available_farmers > 0
-                        ? `${product.available_farmers} farmer${product.available_farmers > 1 ? 's' : ''} selling`
-                        : 'No active stock'}
+                        ? `${product.available_farmers} farmer${product.available_farmers > 1 ? 's' : ''} ${hasLocation ? 'nearby' : 'selling'}`
+                        : hasLocation ? 'None within 20 km' : 'No active stock'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
                   </div>

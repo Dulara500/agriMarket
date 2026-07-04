@@ -140,14 +140,17 @@ const getMe = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   const client = await pool.connect();
   try {
-    const { name, phone, location_address, farm_name, bio, address, id_number } = req.body;
+    const { name, phone, location_address, location_lat, location_lng, farm_name, bio, address, id_number } = req.body;
     await client.query('BEGIN');
 
     await client.query(
       `UPDATE users SET name = COALESCE($1, name), phone = COALESCE($2, phone),
-       location_address = COALESCE($3, location_address), id_number = COALESCE($4, id_number), updated_at = NOW()
-       WHERE id = $5`,
-      [name, phone, location_address, id_number, req.user.id]
+       location_address = COALESCE($3, location_address),
+       location_lat = COALESCE($4, location_lat),
+       location_lng = COALESCE($5, location_lng),
+       id_number = COALESCE($6, id_number), updated_at = NOW()
+       WHERE id = $7`,
+      [name, phone, location_address, location_lat, location_lng, id_number, req.user.id]
     );
 
     if (req.user.role === 'farmer') {
@@ -169,4 +172,24 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, updateProfile };
+// PATCH /api/auth/location
+const updateLocation = async (req, res, next) => {
+  try {
+    const { lat, lng, address } = req.body;
+    if (lat === undefined || lng === undefined) {
+      return res.status(400).json({ success: false, message: 'lat and lng are required' });
+    }
+    const result = await pool.query(
+      `UPDATE users SET location_lat = $1, location_lng = $2, location_address = $3, updated_at = NOW()
+       WHERE id = $4
+       RETURNING id, name, email, phone, role, avatar_url, id_number,
+                 location_lat, location_lng, location_address, created_at`,
+      [lat, lng, address || null, req.user.id]
+    );
+    res.json({ success: true, data: result.rows[0], message: 'Location saved successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getMe, updateProfile, updateLocation };

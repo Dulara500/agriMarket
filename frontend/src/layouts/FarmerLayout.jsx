@@ -3,66 +3,11 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore, useNotificationStore } from '../store';
 import {
   LayoutDashboard, Package, ShoppingBag, TrendingUp,
-  LogOut, Leaf, Bell, Menu, X, PlusCircle, Shield, ChevronDown
+  LogOut, Leaf, Bell, Menu, X, PlusCircle, Shield, ChevronDown, Sprout
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
-function RoleSwitcher() {
-  const { login } = useAuthStore();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-
-  const switchRole = async (email, redirectPath) => {
-    setOpen(false);
-    const loadToast = toast.loading('Switching roles...');
-    try {
-      const { user } = await login({ email, password: 'password' });
-      toast.success(`Logged in as ${user.name}!`, { id: loadToast });
-      navigate(redirectPath);
-    } catch (err) {
-      toast.error('Failed to switch. Ensure demo account exists.', { id: loadToast });
-    }
-  };
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => open ? setOpen(false) : setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-gray-200 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-      >
-        <Shield className="w-3.5 h-3.5 text-amber-600" />
-        <span>Role Switcher</span>
-        <ChevronDown className="w-3 h-3 text-gray-400" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50 animate-in fade-in slide-in-from-top-1">
-            <button
-              onClick={() => switchRole('bob@buyer.com', '/')}
-              className="w-full text-left px-4 py-2.5 text-xs text-gray-700 hover:bg-green-50 hover:text-green-700 font-medium"
-            >
-              Buyer (Bob Buyer)
-            </button>
-            <button
-              onClick={() => switchRole('john@farmer.com', '/farmer')}
-              className="w-full text-left px-4 py-2.5 text-xs text-gray-700 hover:bg-amber-50 hover:text-amber-700 font-medium"
-            >
-              Farmer (John Farmer)
-            </button>
-            <button
-              onClick={() => switchRole('admin@agrimarket.com', '/admin/prices')}
-              className="w-full text-left px-4 py-2.5 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 font-medium"
-            >
-              Admin (Government)
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function FarmerLayout() {
   const { user, token, logout } = useAuthStore();
@@ -91,6 +36,7 @@ export default function FarmerLayout() {
     { to: '/farmer/products', icon: Package, label: 'My Crops' },
     { to: '/farmer/orders', icon: ShoppingBag, label: 'Orders' },
     { to: '/farmer/earnings', icon: TrendingUp, label: 'Earnings' },
+    { to: '/farmer/fertilizers', icon: Sprout, label: 'Fertilizers' },
   ];
 
   const SidebarContent = () => (
@@ -191,7 +137,7 @@ export default function FarmerLayout() {
           </div>
           
           <div className="flex items-center gap-3">
-            <RoleSwitcher />
+            
             
             {/* Notifications */}
             <div className="relative">
